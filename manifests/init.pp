@@ -7,75 +7,84 @@
 #   class apache::php
 #   class mysql::server
 #
-class cacti {
+class cacti
+(
+  $DBname  = 'cacti',
+  $DBuser  = 'cacti',
+  $DBpass  = 'cacti',
+  $installSpine  = true
+
+) inherits cacti::params {
     
   include apache::php
   include mysql::server
  
   package {
-    'httpd':
-      ensure  => installed,
-      name    => $apache::params::apache_name;
-    "cacti":
-      require => [ Package["net-snmp-utils"], Yumrepo[ "Repoforge" ] ];
-    "cacti-spine":
-      require => Package["cacti"];
-    "net-snmp-utils":;
+    $apache:
+      ensure  => installed;
+    $cacti:
+      require => [ Package[$snmp_utils], Yumrepo[ "RepoForge" ] ];
+    #$spine:
+    #  require => Package[$cacti ];
+    $snmp_utils:;
   } # package
     
   service { 
-    'httpd':
+    $apache:
       ensure    => running,
-      name      => $apache::params::apache_name,
       enable    => true;
-    'crond':
+    $cron:
       ensure    => running,
       enable    => true;
   } # service
 
   file {
-    "/var/www/cacti/":
-      require => [ Package["cacti"], Package["httpd"] ],
+    $cacti_dir:
+      require => [ Package[$cacti], Package[$apache] ],
       recurse => true,
-      owner   => "apache",
-      group   => "apache";
-    "/var/www/cacti/include/config.php":
-      source  => "puppet:///modules/cacti/config.php",
-      require => [ Package["cacti"], Package["httpd"] ],
-      owner   => "apache",
-      group   => "apache",
+      owner   => $apache_user,
+      group   => $apache_group;
+    $config_php:
+      source  => $config_php_src,
+      require => [ Package[$cacti], Package[$apache] ],
+      owner   => $apache_user,
+      group   => $apache_group,
       mode    => 640;
-    "/etc/php.ini":
-      source  => "puppet:///modules/cacti/php.ini",
-      require => Package["httpd"];
-    "/etc/httpd/conf.d/cacti.conf":
-      source  => "puppet:///modules/cacti/cacti.conf",
-      notify  => Service["httpd"],
-      require => Package["httpd"];
-    "/etc/spine.conf":
-      source  => "puppet:///modules/cacti/spine.conf",
-      require => Package["cacti-spine"];
-    "/etc/cron.d/cacti":
-      content => "*/5 * * * *	apache	php /var/www/cacti/poller.php &>/dev/null\n",
-      require => Package["cacti"],
-      notify  => Service["crond"], 
+    $php_ini:
+      source  => $php_ini_src,
+      require => Package[$apache];
+    $cacti_conf:
+      source  => $cacti_conf_src,
+      notify  => Service[$apache],
+      require => Package[$apache];
+    $cron_cacti:
+      content => $cron_cacti_content,
+      require => Package[$cacti],
+      notify  => Service[$cron], 
       mode    => 644;
-    "/var/www/cacti/cactiConfig.sql":
-      source  => "puppet:///modules/cacti/cactiConfig.sql",
-      require => Package["cacti"];
+    $cacti_config_sql:
+      source  => $cacti_config_sql_src,
+      require => Package[$cacti];
   } # file
  
-  mysql::db { "cacti":
-    user      =>  'cacti',
-    password  =>  'cacti',
+  mysql::db { $DBname:
+    user      =>  $DBuser,
+    password  =>  $DBpass,
     sql       =>  '/var/www/cacti/cacti.sql',
-    notify    => [ Exec['cacti-config'], Exec['rebuild_poller_cache'] ],
+    notify    => [ Exec['cacti-config'],Exec['spine-config'], Exec['rebuild_poller_cache'] ],
   }
   
   exec{ "cacti-config":
-      command     => "/usr/bin/mysql cacti < /var/www/cacti/cactiConfig.sql",
+      command     => "/usr/bin/mysql $DBname < /var/www/cacti/cactiConfig.sql",
       logoutput   => true,
       refreshonly => true,
+  }
+
+  if $installSpine {
+    class {"cacti::spine" :
+      db_name       => $DBname,
+      require  => [ Package[$cacti], Exec['cacti-config'] ];
+    }
   }
 
   #This is executed to deal with a problem with cacti 8.8.a where the poller cache is not built.

@@ -1,0 +1,30 @@
+<interface>
+	<name>Get Cisco Switch Stack Temperature</name>
+	<index_order_type>alphabetic</index_order_type>
+	<oid_index_parse>OID/REGEXP:^.{27}(.*)</oid_index_parse>
+	<oid_index>1.3.6.1.4.1.9.9.13.1.3.1.2</oid_index>
+	<index_order>vsIndex</index_order>
+
+	<fields>
+		<vsIndex>
+			<name>Index</name>
+			<source>index</source>
+			<direction>input</direction>
+		</vsIndex>
+		<ciscoEnvMonTemperatureStatusDescr>
+			<name>Description</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>1.3.6.1.4.1.9.9.13.1.3.1.2</oid>
+		</ciscoEnvMonTemperatureStatusDescr>
+
+		<ciscoEnvMonTemperatureStatusValue>
+			<name>Temperature</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>1.3.6.1.4.1.9.9.13.1.3.1.3</oid>
+		</ciscoEnvMonTemperatureStatusValue>
+	</fields>
+</interface>

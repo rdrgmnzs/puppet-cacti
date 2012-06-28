@@ -1,1 +1,26 @@
-Installs cacti - http://www.cacti.net/
+Introduction/Notes
+==================
+
+This module was created to install and manage Cacti (http://www.cacti.net/)
+
+In it's current form, this module can only suport RedHat based distros.
+
+However as of now it has only been tested on a CentOS 6.2 machine.
+
+Requirements
+============
+RepoForge repository (http://repoforge.org/)
+puppetlabs-apache    (https://github.com/puppetlabs/puppetlabs-apache)
+puppetlabs-mysql     (https://github.com/puppetlabs/puppetlabs-mysql)
+
+Removal of Cacti objects
+========================
+
+This module does not have the ability to remove templates, graphs, data sources or devices. This process has to be done manually trough the Cacti interface.
+
+License
+=======
+
+Copyright (C) 2012 Rodrigo Menezes <brdude@gmail.com>
+Released under Apache License 2.0
+
