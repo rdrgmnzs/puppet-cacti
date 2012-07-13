@@ -47,6 +47,8 @@ $directory     = '',
 
 ){
 
+  $path = "$directory$filename"
+
   if $filename == '' {
     fail("Failed: filename is required!")
   } #if
@@ -54,11 +56,14 @@ $directory     = '',
     fail("Failed: directory is required!")
   } #else
   else {
-    file {
-      "$directory$filename":
-      source   => "puppet:///modules/cacti/cacti_template/$filename",
-      mode    => 644;
+
+    file { "$path":
+      source  => "puppet:///modules/cacti/cacti_template/$filename",
+      mode    => 644,
+      require => Database[cacti],
+      notify  => Exec[$path],
     } #file
+
   } #else
 
   if $user_rras != '' {
@@ -68,11 +73,11 @@ $directory     = '',
     $with_template_rras = "--with-template-rras"
   } #else
 
-  #This is executed to deal with a problem with cacti 8.8.a where the poller cache is not built.
-  exec{ "$directory$filename":
-      command     => "/usr/bin/php /var/www/cacti/cli/import_template.php --filename=$directory$filename $with_template_rras $with_user_rras",
-      logoutput   => true,
-      require     => File["/var/www/cacti/cacti_templates/$filename"],
-  }
+  exec{ "$path":
+    command      => "/usr/bin/php /var/www/cacti/cli/import_template.php --filename=$directory$filename $with_template_rras $with_user_rras",
+    logoutput    => true,
+    require      => File[$path],
+    refreshonly  => true,
+  } # exec
 
 } #class cacti::import_template
