@@ -19,8 +19,6 @@ To install cacti simply add "include cacti" to your node.
 
 Managing Devices and Graphs
 ===========================
-To manage Devices and Graphs with this module add "include cacti::implementation" to your node.
-
 You will have to create your own "cacti::implementation" class. Look in the main folder for this node to see an example of what can be done.
 
 Removal of Cacti objects
