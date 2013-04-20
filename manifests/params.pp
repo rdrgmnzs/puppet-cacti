@@ -41,6 +41,33 @@ class cacti::params {
       $spine_config_sql       = '/var/www/cacti/spineConfig.sql'
       $spine_config_sql_src   = 'puppet:///modules/cacti/redhat/spineConfig.sql'
     }
+	'ubuntu', 'debian': { 
+		# Users
+		$apache_user	= 'www-data'
+		$apache_group	= 'www-data'
+		# Package and Services Names
+		$cacti			= 'cacti'
+		$apache			= 'apache2'
+		$snmp_utils		= 'snmpd'
+		$spine			= 'cacti-spine'
+		$cron				= 'cron'
+		# Directories and Files
+		$cacti_dir					= '/usr/share/cacti/site'
+		$config_php					= '/usr/share/cacti/site/include/config.php'
+		$config_php_src			= 'puppet:///modules/cacti/debian/config.php'
+		$php_ini						= '/etc/php5/apache2/php.ini'
+		$php_ini_src				= 'puppet:///modules/cacti/debian/php.ini'
+		$cacti_conf					= '/etc/apache2/conf.d/cacti.conf'
+		$cacti_conf_src			= 'puppet:///modules/cacti/debian/cacti.conf'
+		$spine_conf					= '/etc/cacti/spine.conf'
+		$spine_conf_src			= 'puppet:///modules/cacti/debian/spine.conf'
+		$cron_cacti					= '/etc/cron.d/cacti'
+		$cron_cacti_content		= '*/5 * * * * www-data php /usr/share/cacti/site/poller.php >/dev/null 2>/var/log/cacti/poller-error.log'
+		$cacti_config_sql			= '/usr/share/cacti/site/cactiConfig.sql'
+		$cacti_config_sql_src	= 'puppet:///modules/cacti/debian/cactiConfig.sql'
+		$spine_config_sql			= '/usr/share/cacti/site/spineConfig.sql'
+		$spine_config_sql_src	= 'puppet:///modules/cacti/debian/spineConfig.sql'
+	}
     default: { fail("No such operatingsystem: ${::operatingsystem} yet defined") }
   }
 

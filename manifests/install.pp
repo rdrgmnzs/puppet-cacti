@@ -26,7 +26,12 @@ class cacti::install
     $apache:
       ensure  => installed;
     $cacti:
-      require => [ Package[$snmp_utils], Yumrepo[ "RepoForge" ] ];
+		case $operatingsystem { 
+      	centos, redhat: { require => [ Package[$snmp_utils], Yumrepo[ "RepoForge" ] ] }
+			debian, ubuntu: { require => [ Package[$snmp_utils] ] }
+			default: { fail("Unknown operating system") }
+		}
+
     $snmp_utils:;
   } # package
 
